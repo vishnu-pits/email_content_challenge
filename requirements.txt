@@ -1,0 +1,15 @@
+streamlit>=1.30.0
+langchain>=0.1.0
+python-dotenv>=1.0.0
+pandas>=2.0.0
+spacy>=3.7.0
+nltk>=3.8.1
+emoji>=2.8.0
+pycountry>=23.12.0
+phonenumbers>=8.13.0
+gender-guesser>=0.4.0
+python-dateutil>=2.8.2
+scikit-learn>=1.3.0
+langdetect>=1.0.9
+textblob>=0.17.0
+plotly

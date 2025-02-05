@@ -1,0 +1,6 @@
+2025-02-05 11:51:32,305 - __main__ - INFO - Configuration loaded successfully
+2025-02-05 11:51:40,979 - __main__ - INFO - All extractors initialized successfully
+2025-02-05 11:51:40,992 - __main__ - INFO - Starting email processing from directory: data/raw
+2025-02-05 11:51:40,993 - __main__ - INFO - Found 0 emails to process
+2025-02-05 11:51:40,999 - __main__ - INFO - Results saved successfully to data/processed/email_analysis.csv
+2025-02-05 11:51:41,000 - __main__ - INFO - Dashboard launched successfully

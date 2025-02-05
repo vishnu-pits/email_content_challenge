@@ -1,0 +1,35 @@
+# Input/Output Settings
+input_directory: "data/raw"
+output_file: "data/processed/email_analysis.csv"
+
+# Processing Settings
+batch_size: 100
+max_threads: 4
+
+# Analysis Settings
+language_detection:
+  min_confidence: 0.7
+  supported_languages: ["en", "es", "fr", "de", "it"]
+
+sentiment_analysis:
+  model: "basic"  # Options: basic, advanced
+  threshold: 0.5
+
+topic_analysis:
+  num_topics: 10
+  min_topic_frequency: 3
+
+# Extraction Settings
+name_extraction:
+  min_confidence: 0.8
+  use_fuzzy_matching: true
+
+contact_extraction:
+  phone_regions: ["US", "GB", "CA"]
+  address_confidence: 0.7
+
+# Dashboard Settings
+dashboard:
+  theme: "light"
+  auto_refresh_interval: 300  # seconds
+  max_displayed_emails: 1000
