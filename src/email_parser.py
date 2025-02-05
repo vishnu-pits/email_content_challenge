@@ -1,5 +1,3 @@
-# src/email_parser.py
-
 import email
 from email import policy
 from pathlib import Path
@@ -45,13 +43,3 @@ class EmailParser:
             if any(marker in line for marker in signature_markers):
                 return '\n'.join(lines[i:])
         return ''
-
-    def process_directory(self, directory: str) -> List[Dict]:
-        """Process all .eml files in a directory."""
-        email_data = []
-        directory_path = Path(directory)
-        for email_file in directory_path.glob('*.eml'):
-            parsed_data = self.parse_email_file(str(email_file))
-            if parsed_data:
-                email_data.append(parsed_data)
-        return email_data

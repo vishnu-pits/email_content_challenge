@@ -22,7 +22,7 @@ class ContactExtractor:
 
         # Try from email address
         from_email = email_data['from']
-        name_match = re.match(r'"?([^"@]+)"?\s*<?[^>]*>', from_email)
+        name_match = re.match(r'(?:"?([^"<]+)"?\s*)?<[^>]+>', from_email)
         if name_match:
             return name_match.group(1)
 
