@@ -3,6 +3,7 @@ from typing import List, Dict
 import logging
 import spacy
 from collections import Counter
+from langcodes import Language
 
 
 class LanguageDetector:
@@ -18,29 +19,20 @@ class LanguageDetector:
 
     def detect_languages(self, text: str) -> List[Dict[str, float]]:
         """
-        Detect languages in the text with confidence scores.
-        Returns list of language codes with confidence scores.
+        Detect languages in the text and return their names as a comma-separated string.
         """
         try:
             # Use langdetect for initial detection
             lang_probabilities = detect_langs(text)
 
-            # Convert to list of dictionaries
-            detected_langs = [
-                {"lang": lang.lang, "confidence": lang.prob}
-                for lang in lang_probabilities
-            ]
+            # Convert language codes to full language names
+            detected_langs = [Language.get(lang.lang).display_name() for lang in lang_probabilities]
 
-            # Additional validation using spaCy
-            main_lang = detected_langs[0]["lang"] if detected_langs else "en"
-            if main_lang == "en" and self._validate_english(text):
-                detected_langs[0]["confidence"] += 0.1
-
-            return detected_langs
+            return ", ".join(detected_langs)
 
         except Exception as e:
             self.logger.error(f"Error detecting language: {str(e)}")
-            return [{"lang": "en", "confidence": 1.0}]  # Default to English
+            return "English"
 
     def _validate_english(self, text: str) -> bool:
         """Validate if text is truly English using spaCy."""

@@ -36,22 +36,42 @@ class ContactExtractor:
 
     def extract_phone(self, text: str) -> Optional[str]:
         """Extract phone numbers from text."""
-        matches = phonenumbers.PhoneNumberMatcher(text, "US")  # Assumes US format
+        matches = phonenumbers.PhoneNumberMatcher(text, None)
         for match in matches:
-            return phonenumbers.format_number(match.number,
-                                              phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+            # Check if the extracted number is valid
+            if phonenumbers.is_valid_number(match.number):
+                return phonenumbers.format_number(match.number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
         return None
 
     def extract_address(self, text: str) -> Optional[str]:
-        """Extract address using NER and pattern matching."""
+        # Regex for capturing structured addresses
+        address_pattern = re.compile(
+            r'\b(\d+\s+[A-Za-z0-9\s,|-]+(?:Suite|Ste|Apt|Floor|Building|Block)?\s*\d*,?\s*[A-Za-z\s]+,\s*[A-Z]{2}\s*\d{5}(?:-\d{4})?)\b'
+        )
+
+        address_match = address_pattern.search(text)
+        if address_match:
+            # Check if the address is near relevant keywords
+            context_window = text[max(0, address_match.start() - 50): address_match.end() + 50]
+            if any(keyword in context_window.lower() for keyword in ["address", "located at", "sender", "from"]):
+                return address_match.group(0).strip()
+
+        # If regex fails, use NLP-based extraction
         doc = self.nlp(text)
         address_parts = []
+        postal_codes = []
+
         for ent in doc.ents:
-            if ent.label_ in ["GPE", "LOC"]:
+            # Skip entities that are likely not part of an address
+            if ent.label_ in ["DATE", "TIME", "PERCENT", "MONEY"]:
+                continue
+
+            if ent.label_ in ["GPE", "LOC", "FAC", "ORG", "CARDINAL"]:
                 address_parts.append(ent.text)
 
-        # Look for postal codes
-        postal_codes = re.findall(r'\b\d{5}(?:-\d{4})?\b', text)
+            if ent.label_ == "CARDINAL" and re.match(r"\b\d{5,6}(?:-\d{4})?\b", ent.text):
+                postal_codes.append(ent.text)
+
         if postal_codes:
             address_parts.extend(postal_codes)
 
