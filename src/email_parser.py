@@ -1,6 +1,5 @@
 import email
 from email import policy
-from pathlib import Path
 from typing import Dict, List
 import logging
 
@@ -20,7 +19,8 @@ class EmailParser:
                 'to': msg.get('to', ''),
                 'date': msg.get('date', ''),
                 'body': self._get_email_body(msg),
-                'signature': self._extract_signature(self._get_email_body(msg))
+                'signature': self._extract_signature(self._get_email_body(msg)),
+                'headers': self._extract_header(msg),
             }
             return email_data
         except Exception as e:
@@ -37,9 +37,34 @@ class EmailParser:
 
     def _extract_signature(self, body: str) -> str:
         """Extract email signature using common patterns."""
-        signature_markers = ['Best regards', 'Regards', 'Sincerely', 'Thanks']
-        lines = body.split('\n')
-        for i, line in enumerate(lines):
-            if any(marker in line for marker in signature_markers):
-                return '\n'.join(lines[i:])
-        return ''
+        signature_markers = [
+            '\n--\n',
+            '\nRegards',
+            '\nBest regards',
+            '\nKind regards',
+            '\nBest wishes',
+            '\nSincerely',
+            '\nCheers',
+            '\nThanks'
+        ]
+        
+        lowest_idx = len(body)
+        for marker in signature_markers:
+            idx = body.rfind(marker)
+            if idx != -1 and idx < lowest_idx:
+                lowest_idx = idx
+        
+        if lowest_idx < len(body):
+            return body[lowest_idx:].strip()
+        return ""
+    
+    def _extract_header(self, msg) -> Dict:
+        ip_headers = ['received', 'x-originating-ip', 'x-sender-ip']
+        headers = {}
+
+        for header in ip_headers:
+            header_value = msg.get(header, '')
+            if header_value:
+                headers[header] = header_value
+
+        return headers

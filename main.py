@@ -2,7 +2,6 @@ import streamlit as st
 import os
 import pandas as pd
 import tempfile
-from pathlib import Path
 
 # Import our custom modules
 from src.email_parser import EmailParser
@@ -12,6 +11,7 @@ from src.extractors.language_detector import LanguageDetector
 from src.extractors.sentiment_analyzer import SentimentAnalyzer
 from src.extractors.topic_analyzer import TopicAnalyzer
 from src.extractors.job_company_extractor import JobCompanyExtractor
+from src.extractors.email_location_extractor import EmailLocationExtractor
 
 class EmailAnalyzer:
     def __init__(self):
@@ -23,11 +23,11 @@ class EmailAnalyzer:
         self.sentiment_analyzer = SentimentAnalyzer()
         self.topic_analyzer = TopicAnalyzer()
         self.job_company_extractor = JobCompanyExtractor()
+        self.email_location_extractor = EmailLocationExtractor()
 
     def process_single_email(self, email_data: dict) -> dict:
         """Process a single email and extract all required information."""
         try:
-        
             # Extract contact information
             name = self.contact_extractor.extract_name(email_data)
             result = {
@@ -47,15 +47,20 @@ class EmailAnalyzer:
 
             # Extract basic information
             result.update({
+                'Personal or Businness Email': self.contact_extractor.classify_email(email_data.get('from', '')),
+                'Country or Region': self.email_location_extractor.extract_location(email_data),
                 'phone': self.contact_extractor.extract_phone(email_data.get('body', '')),
-                'email_id': email_data.get('message-id', ''),
-                'subject': email_data.get('subject', ''),
-                'date': email_data.get('date', ''),
             })
 
             # Extract email type and basic features
             basic_features = self.basic_extractor.extract_features(email_data)
             result.update(basic_features)
+
+            result.update({
+                'email_id': email_data.get('message-id', ''),
+                'subject': email_data.get('subject', ''),
+                'date': email_data.get('date', ''),
+            })
 
             # Perform sentiment analysis
             sentiment = self.sentiment_analyzer.analyze_sentiment(email_data)

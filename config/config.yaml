@@ -1,7 +1,3 @@
-# Input/Output Settings
-input_directory: "data/raw"
-output_file: "data/processed/email_analysis.csv"
-
 # Processing Settings
 batch_size: 100
 max_threads: 4
@@ -30,6 +26,6 @@ contact_extraction:
 
 # Dashboard Settings
 dashboard:
-  theme: "light"
+  theme: "dark"
   auto_refresh_interval: 300  # seconds
   max_displayed_emails: 1000

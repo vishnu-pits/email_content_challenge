@@ -5,6 +5,7 @@ import spacy
 import gender_guesser.detector as gender
 import phonenumbers
 from typing import Dict, Optional
+import tldextract
 
 
 class ContactExtractor:
@@ -76,3 +77,25 @@ class ContactExtractor:
             address_parts.extend(postal_codes)
 
         return ", ".join(address_parts) if address_parts else None
+    
+
+    def classify_email(self, email_input: str) -> str:
+        personal_domains = {
+            "gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "aol.com",
+            "icloud.com", "protonmail.com", "zoho.com", "yandex.com", "mail.com"
+        }
+
+        # Extract email address using regex
+        match = re.search(r'[\w\.-]+@[\w\.-]+', email_input)
+        if not match:
+            raise ValueError("Invalid email address: no email pattern found.")
+
+        email = match.group()
+        domain = email.split("@")[-1].lower()
+        extracted = tldextract.extract(domain)
+        root_domain = f"{extracted.domain}.{extracted.suffix}"
+
+        if root_domain in personal_domains:
+            return "Personal"
+        else:
+            return "Business"
