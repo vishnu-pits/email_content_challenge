@@ -33,12 +33,6 @@ class JobCompanyExtractor:
     def extract_job_company(self, email_data: Dict) -> Dict[str, str]:
         """
         Extract job position and company information from email data.
-        
-        Args:
-            email_data: Dictionary containing email information including body, signature, and headers
-            
-        Returns:
-            Dictionary containing job title and company information
         """
         try:
             # Initialize result
@@ -101,7 +95,7 @@ class JobCompanyExtractor:
                         break
                 if job_title:
                     break
-
+        
         # Calculate confidence based on presence of structured information
         confidence = 0.0
         if job_title:

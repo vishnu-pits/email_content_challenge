@@ -36,7 +36,7 @@ class EmailAnalyzer:
             name = self.contact_extractor.extract_name(email_data)
             result = {
                 'Full Name': name,
-                'Address': self.contact_extractor.extract_address(email_data.get('body', '')),
+                'Address': self.contact_extractor.extract_address(email_data.get('signature', '')),
                 'Languages Spoken': self.language_detector.detect_languages(email_data.get('body', '')),
                 'Gender': self.contact_extractor.predict_gender(name),
             }
@@ -53,7 +53,7 @@ class EmailAnalyzer:
             result.update({
                 'Personal or Businness Email': self.contact_extractor.classify_email(email_data.get('from', '')),
                 'Country or Region': self.email_location_extractor.extract_location(email_data),
-                'phone': self.contact_extractor.extract_phone(email_data.get('body', '')),
+                'phone': self.contact_extractor.extract_phone(email_data.get('signature', '')),
             })
 
             # Extract email type and basic features
@@ -72,7 +72,7 @@ class EmailAnalyzer:
             result['Technology Stack Used'] = self.topic_analyzer.format_tech_stack_for_dataframe(tech_array)
 
             # Image-based Insights
-            st.write(email_data.get('images', ''))
+            
 
             # Identifying networks
             result['Relationship Mapping'] = re.findall(r'[\w\.-]+@[\w\.-]+', email_data.get('to', ''))
