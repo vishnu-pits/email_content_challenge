@@ -18,8 +18,8 @@ class SentimentAnalyzer:
 
     def analyze_sentiment(self, email_data: Dict) -> Dict:
         """
-        Analyze sentiment of email components and return detailed sentiment analysis.
-        Returns dict with overall score and component-wise analysis.
+        Analyze sentiment of email components and return a single emotional value as a string.
+        Returns one of: 'very positive', 'positive', 'neutral', 'negative', 'very negative'
         """
         try:
             # Analyze different components
@@ -29,30 +29,26 @@ class SentimentAnalyzer:
 
             # Calculate weighted sentiment
             overall_sentiment = (
-                    subject_sentiment['score'] * self.sentiment_weights['subject'] +
-                    body_sentiment['score'] * self.sentiment_weights['body'] +
-                    signature_sentiment['score'] * self.sentiment_weights['signature']
+                subject_sentiment['score'] * self.sentiment_weights['subject'] +
+                body_sentiment['score'] * self.sentiment_weights['body'] +
+                signature_sentiment['score'] * self.sentiment_weights['signature']
             )
 
-            # Extract emotional indicators
-            emotions = self._detect_emotions(email_data.get('body', ''))
-
-            return {
-                'overall_score': overall_sentiment,
-                'components': {
-                    'subject': subject_sentiment,
-                    'body': body_sentiment,
-                    'signature': signature_sentiment
-                },
-                'emotions': emotions,
-                'confidence': self._calculate_confidence(
-                    subject_sentiment, body_sentiment, signature_sentiment
-                )
-            }
+            # Convert numerical score to categorical sentiment
+            if overall_sentiment >= 0.6:
+                return 'very positive'
+            elif overall_sentiment >= 0.2:
+                return 'positive'
+            elif overall_sentiment > -0.2:
+                return 'neutral'
+            elif overall_sentiment > -0.6:
+                return 'negative'
+            else:
+                return 'very negative'
 
         except Exception as e:
             self.logger.error(f"Error in sentiment analysis: {str(e)}")
-            return {'overall_score': 0, 'components': {}, 'emotions': [], 'confidence': 0}
+            return 'neutral'
 
     def _analyze_text(self, text: str) -> Dict:
         """Analyze sentiment of a text segment."""

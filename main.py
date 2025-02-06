@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import pandas as pd
 import tempfile
+import re
 
 # Import our custom modules
 from src.email_parser import EmailParser
@@ -13,6 +14,7 @@ from src.extractors.topic_analyzer import TopicAnalyzer
 from src.extractors.job_company_extractor import JobCompanyExtractor
 from src.extractors.email_location_extractor import EmailLocationExtractor
 
+
 class EmailAnalyzer:
     def __init__(self):
         # Initialize extractors
@@ -22,11 +24,13 @@ class EmailAnalyzer:
         self.language_detector = LanguageDetector()
         self.sentiment_analyzer = SentimentAnalyzer()
         self.topic_analyzer = TopicAnalyzer()
+        self.format_topics_for_dataframe = TopicAnalyzer()
         self.job_company_extractor = JobCompanyExtractor()
         self.email_location_extractor = EmailLocationExtractor()
 
     def process_single_email(self, email_data: dict) -> dict:
         """Process a single email and extract all required information."""
+        
         try:
             # Extract contact information
             name = self.contact_extractor.extract_name(email_data)
@@ -56,18 +60,22 @@ class EmailAnalyzer:
             basic_features = self.basic_extractor.extract_features(email_data)
             result.update(basic_features)
 
-            result.update({
-                'email_id': email_data.get('message-id', ''),
-                'subject': email_data.get('subject', ''),
-                'date': email_data.get('date', ''),
-            })
-
             # Perform sentiment analysis
-            sentiment = self.sentiment_analyzer.analyze_sentiment(email_data)
-            result['sentiment'] = sentiment.get('overall_score', 0)
-
+            result['Sentiment Analysis'] = self.sentiment_analyzer.analyze_sentiment(email_data)
+            
             # Extract topics
-            result['topics'] = self.topic_analyzer.extract_topics(email_data.get('body', ''))
+            topics = self.topic_analyzer.extract_topics(email_data)
+            result['Topics of Interest'] = self.topic_analyzer.format_topics_for_dataframe(topics)
+           
+            # Extract Technology Stack
+            tech_array = self.topic_analyzer.extract_tech_stack(email_data)
+            result['Technology Stack Used'] = self.topic_analyzer.format_tech_stack_for_dataframe(tech_array)
+
+            # Image-based Insights
+            st.write(email_data.get('images', ''))
+
+            # Identifying networks
+            result['Relationship Mapping'] = re.findall(r'[\w\.-]+@[\w\.-]+', email_data.get('to', ''))
 
             return result
 
